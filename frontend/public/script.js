@@ -1,5 +1,5 @@
 //TODO: Assign link of API here:
-const api = 'http://localhost:1724/'
+const api = 'http://4.145.107.27:80'
 
 let game = {}
 let roomId = undefined;
@@ -14,12 +14,21 @@ function handleSubmitRoomId(){
 }
 
 function getJSON() {
-    fetch(api)
+    // Encode JSON data as query parameters
+    const jsonData = {
+        "room_id": roomId,
+    };
+    const queryParams = new URLSearchParams(jsonData).toString();
+
+    // URL endpoint with query parameters
+    const url = `${api}?${queryParams}`;
+
+    fetch(url)
         .then(response => response.json())
         .then(response => game = response)
         .catch(err => console.error(err));
 
-    // let prevMatchId, currentMatchId 
+    // let prevMatchId, currentMatchId
     // currentMatchId = game.match_id
     if(game.status!= "None" && game.status!=undefined){
         // End the game
@@ -34,14 +43,14 @@ function getJSON() {
     }
 
     if(game.room_id===roomId && game.room_id !== undefined){
-        drawBoard();   
+        drawBoard();
         render();
-    } 
+    }
 
 }
 
 function handleConfirm() {
-    // Clear 
+    // Clear
     game = {}
     clearInterval(fetchInterval);
     document.getElementById("status").style.display = "none";
@@ -61,11 +70,11 @@ function drawBoard() {
         document.getElementById("status").style.display = "none";
         document.getElementById("confirm-button-container").style.display = "none";
     }
-    
+
     var size = game.size;
     var gameBoard = document.getElementsByClassName("gameboard");
     var gameBoardHTML = "<table cell-spacing = '0'>";
-    
+
     for (var i = 0; i < size; i++) {
         gameBoardHTML += "<tr>"
         for (var j = 0; j < size; j++) {
@@ -79,7 +88,7 @@ function drawBoard() {
                     + game.board[i][j]
                     + "</td>"
             }
-                         
+
             else if (game.board[i][j] == 'x'){
                 gameBoardHTML += `<td style='width:${600 / size}px; height:${600 / size}px; font-size:${400 / size}px; font-weight: 300; color: rgb(254,96,93)'>`
                 + game.board[i][j]
@@ -157,9 +166,3 @@ function render() {
     document.getElementById('score2').innerHTML = game.score2 != undefined ? game.score2 : ""
 
 }
-
-
-
-
-
-
