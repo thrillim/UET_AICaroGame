@@ -51,6 +51,7 @@ size = 5
 #################
 
 rooms = {}
+room_by_teams = {}
 
 BOARD = []
 for i in range(size):
@@ -67,21 +68,29 @@ def get_data():
     info = json.loads(data.decode('utf-8'))
     log(info)
     global rooms
-    room_id = utils.random_room_id() if "room_id" not in info else info["room_id"]
-    match_id = 1
-    team1_id = info["team1_id"]
-    team2_id = info["team2_id"]
-    team1_id_full = team1_id + "+" + team1_role
-    team2_id_full = team2_id + "+" + team2_role
-    board_game = BoardGame(size, BOARD, room_id, match_id, team1_id_full, team2_id_full)
-    rooms[room_id] = board_game
+    global room_by_teams
+    room_id = info["room_id"]
+    is_init = False
+    if room_id not in rooms:
+        match_id = 1
+        team1_id = info["team1_id"]
+        team2_id = info["team2_id"]
+        team1_id_full = team1_id + "+" + team1_role
+        team2_id_full = team2_id + "+" + team2_role
+        room_by_teams[team1_id] = room_id
+        room_by_teams[team2_id] = room_id
+        board_game = BoardGame(size, BOARD, room_id, match_id, team1_id_full, team2_id_full)
+        rooms[room_id] = board_game
+        is_init = True
+
+    board_game = rooms[room_id]
     return {
         "room_id": board_game.game_info["room_id"],
         "match_id": board_game.game_info["match_id"],
         "team1_id": board_game.game_info["team1_id"],
         "team2_id": board_game.game_info["team2_id"],
         "size": board_game.game_info["size"],
-        "init": True,
+        "init": is_init,
     }
 
 
@@ -110,7 +119,17 @@ def render_board():
 @cross_origin()
 def fe_render_board():
     global rooms
+    if "room_id" not in request.args:
+        return {
+            "code": 1,
+            "error": "missing room_id"
+        }
     room_id = request.args.get('room_id')
+    if room_id not in rooms:
+        return {
+            "code": 1,
+            "error": f"not found room: {room_id}"
+        }
     board_game = rooms[room_id]
     # log(board_game.game_info)
     response = make_response(jsonify(board_game.game_info))
