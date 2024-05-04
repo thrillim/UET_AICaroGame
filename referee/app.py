@@ -44,9 +44,13 @@ def log(*args):
 
 
 # Global variance
-PORT = 80
+PORT = 1724
+team1_id = "xx1"
+team2_id = "xx2"
 team1_role = "x"
 team2_role = "o"
+room_id = "123"
+match_id = "321"
 size = 5
 #################
 
@@ -59,6 +63,10 @@ for i in range(size):
     for j in range(size):
         BOARD[i].append(' ')
 
+team1_id_full = team1_id + "+" + team1_role
+team2_id_full = team2_id + "+" + team2_role
+board_game = BoardGame(size, BOARD, room_id, match_id,
+                       team1_id_full, team2_id_full)
 
 @app.route('/init', methods=['POST'])
 @cross_origin()
@@ -66,31 +74,31 @@ def get_data():
     log("/init")
     data = request.data
     info = json.loads(data.decode('utf-8'))
-    log(info)
-    global rooms
-    global room_by_teams
-    room_id = info["room_id"]
-    is_init = False
-    if room_id not in rooms:
-        match_id = 1
-        team1_id = info["team1_id"]
-        team2_id = info["team2_id"]
-        team1_id_full = team1_id + "+" + team1_role
-        team2_id_full = team2_id + "+" + team2_role
-        room_by_teams[team1_id] = room_id
-        room_by_teams[team2_id] = room_id
-        board_game = BoardGame(size, BOARD, room_id, match_id, team1_id_full, team2_id_full)
-        rooms[room_id] = board_game
-        is_init = True
+    # log(info)
+    # global rooms
+    # global room_by_teams
+    # room_id = info["room_id"]
+    # is_init = False
+    # if room_id not in rooms:
+    #     match_id = 1
+    #     team1_id = info["team1_id"]
+    #     team2_id = info["team2_id"]
+    #     team1_id_full = team1_id + "+" + team1_role
+    #     team2_id_full = team2_id + "+" + team2_role
+    #     room_by_teams[team1_id] = room_id
+    #     room_by_teams[team2_id] = room_id
+    #     board_game = BoardGame(size, BOARD, room_id, match_id, team1_id_full, team2_id_full)
+    #     rooms[room_id] = board_game
+    #     is_init = True
 
-    board_game = rooms[room_id]
+    # board_game = rooms[room_id]
     return {
         "room_id": board_game.game_info["room_id"],
         "match_id": board_game.game_info["match_id"],
         "team1_id": board_game.game_info["team1_id"],
         "team2_id": board_game.game_info["team2_id"],
         "size": board_game.game_info["size"],
-        "init": is_init,
+        "init": True,
     }
 
 
@@ -100,11 +108,11 @@ def render_board():
     data = request.data
     info = json.loads(data.decode('utf-8'))
     log(info['team_id'])
-    global rooms
-    room_id = info["room_id"]
-    board_game = rooms[room_id]
-    team1_id_full = board_game.game_info["team1_id"]
-    team2_id_full = board_game.game_info["team2_id"]
+    # global rooms
+    # room_id = info["room_id"]
+    # board_game = rooms[room_id]
+    # team1_id_full = board_game.game_info["team1_id"]
+    # team2_id_full = board_game.game_info["team2_id"]
     time_list = board_game.timestamps
 
     if (info["team_id"] == team1_id_full and not board_game.start_game):
@@ -118,19 +126,19 @@ def render_board():
 @app.route('/')
 @cross_origin()
 def fe_render_board():
-    global rooms
-    if "room_id" not in request.args:
-        return {
-            "code": 1,
-            "error": "missing room_id"
-        }
-    room_id = request.args.get('room_id')
-    if room_id not in rooms:
-        return {
-            "code": 1,
-            "error": f"not found room: {room_id}"
-        }
-    board_game = rooms[room_id]
+    # global rooms
+    # if "room_id" not in request.args:
+    #     return {
+    #         "code": 1,
+    #         "error": "missing room_id"
+    #     }
+    # room_id = request.args.get('room_id')
+    # if room_id not in rooms:
+    #     return {
+    #         "code": 1,
+    #         "error": f"not found room: {room_id}"
+    #     }
+    # board_game = rooms[room_id]
     # log(board_game.game_info)
     response = make_response(jsonify(board_game.game_info))
     # log(board_game.game_info)
@@ -144,16 +152,16 @@ def handle_move():
     data = request.data
 
     data = json.loads(data.decode('utf-8'))
-    global rooms
-    room_id = data["room_id"]
-    if room_id not in rooms:
-        return {
-            "code": 1,
-            "error": "Room not found"
-        }
-    board_game = rooms[room_id]
-    team1_id_full = board_game.game_info["team1_id"]
-    team2_id_full = board_game.game_info["team2_id"]
+    # global rooms
+    # room_id = data["room_id"]
+    # if room_id not in rooms:
+    #     return {
+    #         "code": 1,
+    #         "error": "Room not found"
+    #     }
+    # board_game = rooms[room_id]
+    # team1_id_full = board_game.game_info["team1_id"]
+    # team2_id_full = board_game.game_info["team2_id"]
     time_list = board_game.timestamps
 
     log(f"game info: {board_game.game_info}")
